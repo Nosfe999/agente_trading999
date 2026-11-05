@@ -1,19 +1,19 @@
-import time
 import requests
 import yfinance as yf
 from ta.volatility import AverageTrueRange
 from ta.momentum import RSIIndicator
+import pandas as pd
 
-# Configuración de tu canal de ntfy.sh (¡Pon aquí el nombre único que elegiste en la app de tu Android!)
-NTFY_TOPIC = "mi_trading_bot_alerta_999"
+# Configuración de tu canal de ntfy.sh (¡Asegúrate de que coincida con el que elegiste en tu app de Android!)
+NTFY_TOPIC = "mi_trading_bot_alerta_998822"
 
 def enviar_alerta(titulo, mensaje, prioridad="default"):
     try:
         requests.post(
             f"https://ntfy.sh/{NTFY_TOPIC}",
-            data=mensaje.encode(utf-8),
+            data=mensaje.encode("utf-8"),
             headers={
-                "Title": titulo.encode(utf-8),
+                "Title": titulo.encode("utf-8"),
                 "Priority": prioridad,
                 "Tags": "chart_with_upwards_trend,warning"
             }
@@ -34,7 +34,7 @@ def analizar_mercados():
     print("Ejecutando escaneo de mercado...")
     for nombre, ticker in activos.items():
         try:
-            # Descargar datos de la última hora / día
+            # Descargar datos recientes
             df = yf.download(ticker, period="5d", interval="1h", progress=False)
             if df.empty:
                 continue
@@ -57,7 +57,7 @@ def analizar_mercados():
 
             print(f"[{nombre}] Precio: {precio_actual:.2f} | RSI: {rsi:.1f} | Cambio: {cambio_porcentual:.2f}%")
 
-            # Reglas de Alerta Inteligente (Ejemplo: Sobrecompra/Sobreventa extrema o movimientos bruscos)
+            # Reglas de Alerta Inteligente
             if rsi > 75:
                 enviar_alerta(
                     f"⚠️ ALERTA RIESGO CAÍDA: {nombre}",
@@ -82,9 +82,5 @@ def analizar_mercados():
             print(f"Error procesando {nombre}: {e}")
 
 if __name__ == "__main__":
-    # Bucle de ejecución continua (puedes adaptarlo para que corra cada 15-30 minutos)
-    print("Agente de Mercado Iniciado...")
-    while True:
-        analizar_mercados()
-        # Espera 15 minutos antes del próximo escaneo para no saturar APIs gratuitas
-        time.sleep(900)
+    # Ejecuta el análisis una sola vez y finaliza para integrarse con GitHub Actions
+    analizar_mercados()
